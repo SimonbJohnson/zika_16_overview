@@ -1,5 +1,5 @@
 function generateDashboard(data,geom){
-    var map = new lg.map('#map').geojson(geom).nameAttr('name').joinAttr('ISO_A3').zoom(2).center([20,-80]);
+    var map = new lg.map('#map').geojson(geom).nameAttr('NAME').joinAttr('ISO_A3').zoom(2).center([20,-80]);
 
     var status = new lg.column('STATUS')
                         .label('Status')
