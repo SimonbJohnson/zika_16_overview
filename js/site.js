@@ -1,4 +1,4 @@
-function generateDashboard(data,geom){
+function generateDashboard(data,activities,geom){
     var map = new lg.map('#map').geojson(geom).nameAttr('NAME').joinAttr('ISO_A3').zoom(2).center([20,-80]);
 
     var status = new lg.column('STATUS')
@@ -47,11 +47,39 @@ function generateDashboard(data,geom){
                                 if(c==5){c=4}
                                 return c
                             }
-                        );                         
+                        );
 
-    var grid = new lg.grid('#grid')
+    var vAccessor = function(d){
+                            if(d== 'TRUE'){
+                                return 1;
+                            } else {
+                                return 0.99999
+                            }
+                        };
+
+    var cAccessor = function(d,i,max){
+                            if(d=='TRUE'){
+                                return 0;
+                            } else {
+                                return 1;
+                            }
+                        }
+
+    var colors = ['#388E3C','#C62828']                  
+
+    var riskComms = new lg.column('Risk communication to general public').domain([0,1]).axisLabels(false).valueAccessor(vAccessor).colorAccessor(cAccessor).colors(colors);                                             
+    var commClean = new lg.column("Community clean-up campaigns").domain([0,1]).axisLabels(false).valueAccessor(vAccessor).colorAccessor(cAccessor).colors(colors);
+    var hhPro = new lg.column("Household and personal protection").domain([0,1]).axisLabels(false).valueAccessor(vAccessor).colorAccessor(cAccessor).colors(colors);   
+    var infoPreg = new lg.column("Information and commodities for pregnant women").domain([0,1]).axisLabels(false).valueAccessor(vAccessor).colorAccessor(cAccessor).colors(colors);
+    var psySup = new lg.column("Psychosocial support for affected families").domain([0,1]).axisLabels(false).valueAccessor(vAccessor).colorAccessor(cAccessor).colors(colors);
+    var bloodSafe = new lg.column("Blood safety").domain([0,1]).axisLabels(false).valueAccessor(vAccessor).colorAccessor(cAccessor).colors(colors);
+    var chemCont = new lg.column("Chemical vector control Staff and volunteer safety").domain([0,1]).axisLabels(false).valueAccessor(vAccessor).colorAccessor(cAccessor).colors(colors);
+    var protPart = new lg.column("Protection for particular settings").domain([0,1]).axisLabels(false).valueAccessor(vAccessor).colorAccessor(cAccessor).colors(colors);
+    var commSurv = new lg.column("Community-based surveillance").domain([0,1]).axisLabels(false).valueAccessor(vAccessor).colorAccessor(cAccessor).colors(colors);
+    
+    var grid1 = new lg.grid('#grid1')
         .data(data)
-        .width($('#grid').width())
+        .width($('#grid1').width())
         .height(1200)
         .nameAttr('Country')
         .joinAttr('ISO-3')
@@ -59,6 +87,17 @@ function generateDashboard(data,geom){
         .vWhiteSpace(4)
         .margins({top: 150, right: 20, bottom: 30, left: 200})
         .columns([affected,status,affectedper100000]);
+
+    var grid2 = new lg.grid('#grid2')
+        .data(activities)
+        .width($('#grid1').width())
+        .height(1200)
+        .nameAttr('Columna Primaria')
+        .joinAttr('ISO-3')
+        .hWhiteSpace(4)
+        .vWhiteSpace(4)
+        .margins({top: 150, right: 20, bottom: 30, left: 200})
+        .columns([riskComms,commClean,hhPro,infoPreg,psySup,bloodSafe,chemCont,protPart,commSurv]);        
 
     lg.init();
 
@@ -77,6 +116,18 @@ function stickydiv(){
     }
 };
 
+$('#grid2').hide();
+
+$('#overviewbutton').on('click',function(){
+    $('#grid2').hide();
+    $('#grid1').show();
+});
+
+$('#activitiesbutton').on('click',function(){
+    $('#grid1').hide();
+    $('#grid2').show();
+});
+
 $(window).scroll(function(){
     stickydiv();
 }); 
@@ -86,6 +137,12 @@ $(window).scroll(function(){
 var dataCall = $.ajax({ 
     type: 'GET', 
     url: 'data/data.json', 
+    dataType: 'json',
+});
+
+var activitiesCall = $.ajax({ 
+    type: 'GET', 
+    url: 'data/activities.json', 
     dataType: 'json',
 });
 
@@ -99,7 +156,7 @@ var geomCall = $.ajax({
 
 //when both ready construct dashboard
 
-$.when(dataCall, geomCall).then(function(dataArgs, geomArgs){
+$.when(dataCall, activitiesCall, geomCall).then(function(dataArgs, activitiesArgs, geomArgs){
     geom = topojson.feature(geomArgs[0],geomArgs[0].objects.geom);
-    generateDashboard(dataArgs[0],geom);
+    generateDashboard(dataArgs[0],activitiesArgs[0],geom);
 });

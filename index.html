@@ -16,17 +16,28 @@
     </head>
     <body class="container">
         <div class="row">
-            <div class="col-md-12">
-                <h2>Zika Overview Dashboard</h2>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+            <div class="col-md-8">
+                <h1>Vector-Borne Disease Operation</h1>
+                <p class="titledesc">Overview and response dashboard. Hover the grid to see the map for each variable. Clicking the variable name will sort the table by that variable. Click the red theme buttons to see other variables.</p>
+            </div>
+            <div class="col-md-4">
+                <p id="image"class="rightalign"><img src="images/ifrc.png" height="50" width="300"/></p>
+                <h3 class="rightalign">IFRC Americas</h3>
+                <p class="titledesc rightalign">Produced by SIMS</p>
             </div>
         </div>
         <div class="row">           
             <div class="col-md-6">
+                <div id="navigation">
+                    <button id="overviewbutton" class="btn btn-default">Overview</button><button id="activitiesbutton"  class="btn btn-default">Activities</button>
+                </div>
                 <div id="sticky-anchor"></div>
                 <div id="map-container"><div id="map"></div></div>
             </div>
-            <div id="grid" class="col-md-6"></div>
+            <div class="col-md-6">
+                <div id="grid1"></div>
+                <div id="grid2"></div>
+            </div>
         </div>
         </div>
         <script src='js/site.js'></script>
