@@ -692,20 +692,19 @@ var lg =  {
 
             data.sort(function(a, b) {
                 return a[_parent._nameAttr].localeCompare(b[_parent._nameAttr]);
-            });
+            });         
 
-            var newData = [];
+            columns.forEach(function(v,i){
 
-            data.forEach(function(d,i){
-                console.log(d);
-                var nd = {};
-                nd.pos = d.pos;
-                nd.join = d[_parent._joinAttr];
-                newData.push(nd);
-            });            
+                var newData = [];
 
-            columns.forEach(function(v,i){                
-
+                data.forEach(function(d,i){               
+                     var nd = {};      
+                     nd.pos = d.pos;       
+                     nd.join = d[_parent._joinAttr];       
+                     nd.value = d[v._dataName];        
+                     newData.push(nd);     
+                });
                 d3.selectAll(".bars"+i+'id'+_parent._idnum)
                     .data(newData)                  
                     .transition()
@@ -723,11 +722,11 @@ var lg =  {
             });
 
             d3.selectAll(".horLineTopid"+_parent._idnum)
-                .attr("y1",function(d,i){console.log('top:'+d.pos);return _parent._properties.boxHeight*(d.pos)+(d.pos-0.5)*_parent._vWhiteSpace})
+                .attr("y1",function(d,i){return _parent._properties.boxHeight*(d.pos)+(d.pos-0.5)*_parent._vWhiteSpace})
                 .attr("y2",function(d,i){return _parent._properties.boxHeight*(d.pos)+(d.pos-0.5)*_parent._vWhiteSpace});
 
             d3.selectAll(".horLineBotid"+_parent._idnum)
-                .attr("y1",function(d,i){console.log('bottom'+d.pos);return _parent._properties.boxHeight*(d.pos+1)+(d.pos+0.5)*_parent._vWhiteSpace})
+                .attr("y1",function(d,i){return _parent._properties.boxHeight*(d.pos+1)+(d.pos+0.5)*_parent._vWhiteSpace})
                 .attr("y2",function(d,i){return _parent._properties.boxHeight*(d.pos+1)+(d.pos+0.5)*_parent._vWhiteSpace});             
 
 

@@ -1,7 +1,7 @@
 function generateDashboard(data,activities,geom){
     var map = new lg.map('#map').geojson(geom).nameAttr('NAME').joinAttr('ISO_A3').zoom(2).center([20,-80]);
-
-    var status = new lg.column('STATUS')
+    console.log(data)
+    var status = new lg.column('#status')
                         .label('Status')
                         .domain([0,1])
                         .axisLabels(false)
@@ -25,9 +25,10 @@ function generateDashboard(data,activities,geom){
                                 return 0;
                             }
                         })
-                        .colors(['#388E3C','#FDD835','#C62828']);
+                        .colors(['#99d594','#ffcc00','#ff0000']);
 
-    var affected = new lg.column('# Affected').label('No. Affected').scale(d3.scale.log()).domain([1,1500000])
+    var affected = new lg.column('#affected+total').label('No. Affected').scale(d3.scale.log()).domain([1,1500000])
+                        .colors(['#edf8fb','#b3cde3','#8c96c6','#8856a7','#810f7c'])
                         .colorAccessor(
                             function(d,i,max){
                                 d=Math.log(d+1);
@@ -38,7 +39,8 @@ function generateDashboard(data,activities,geom){
                             }
                         );
 
-    var affectedper100000 = new lg.column('Affected per 100,000').label('Affected per 100,000').scale(d3.scale.log()).domain([1,1000])
+    var affectedper100000 = new lg.column('#affected+percapita').label('Affected per 100,000').scale(d3.scale.log()).domain([1,1000])
+                        .colors(['#edf8fb','#b3cde3','#8c96c6','#8856a7','#810f7c'])
                         .colorAccessor(
                             function(d,i,max){
                                 d=Math.log(d+1);
@@ -48,9 +50,9 @@ function generateDashboard(data,activities,geom){
                                 return c
                             }
                         );
-
+                        console.log(activities);
     var vAccessor = function(d){
-                            if(d== 'TRUE'){
+                            if(d== 'true'){
                                 return 1;
                             } else {
                                 return 0.99999
@@ -58,51 +60,79 @@ function generateDashboard(data,activities,geom){
                         };
 
     var cAccessor = function(d,i,max){
-                            if(d=='TRUE'){
+                            if(d=='true'){
                                 return 0;
                             } else {
                                 return 1;
                             }
                         }
 
-    var colors = ['#388E3C','#C62828']                  
+    var colors = ['#81C784','#FFCDD2'];                  
 
-    var riskComms = new lg.column('Risk communication to general public').domain([0,1]).axisLabels(false).valueAccessor(vAccessor).colorAccessor(cAccessor).colors(colors);                                             
-    var commClean = new lg.column("Community clean-up campaigns").domain([0,1]).axisLabels(false).valueAccessor(vAccessor).colorAccessor(cAccessor).colors(colors);
-    var hhPro = new lg.column("Household and personal protection").domain([0,1]).axisLabels(false).valueAccessor(vAccessor).colorAccessor(cAccessor).colors(colors);   
-    var infoPreg = new lg.column("Information and commodities for pregnant women").domain([0,1]).axisLabels(false).valueAccessor(vAccessor).colorAccessor(cAccessor).colors(colors);
-    var psySup = new lg.column("Psychosocial support for affected families").domain([0,1]).axisLabels(false).valueAccessor(vAccessor).colorAccessor(cAccessor).colors(colors);
-    var bloodSafe = new lg.column("Blood safety").domain([0,1]).axisLabels(false).valueAccessor(vAccessor).colorAccessor(cAccessor).colors(colors);
-    var chemCont = new lg.column("Chemical vector control Staff and volunteer safety").domain([0,1]).axisLabels(false).valueAccessor(vAccessor).colorAccessor(cAccessor).colors(colors);
-    var protPart = new lg.column("Protection for particular settings").domain([0,1]).axisLabels(false).valueAccessor(vAccessor).colorAccessor(cAccessor).colors(colors);
-    var commSurv = new lg.column("Community-based surveillance").domain([0,1]).axisLabels(false).valueAccessor(vAccessor).colorAccessor(cAccessor).colors(colors);
-    
+    var riskComms = new lg.column('#activity+riskcomms').label('Risk communication to general public').domain([0,1]).axisLabels(false).valueAccessor(vAccessor).colorAccessor(cAccessor).colors(colors);                                             
+    var commClean = new lg.column("#activity+cleanup").label('Community clean-up campaigns').domain([0,1]).axisLabels(false).valueAccessor(vAccessor).colorAccessor(cAccessor).colors(colors);
+    var hhPro = new lg.column("#activity+hhprotection").label('Household and personal protection').domain([0,1]).axisLabels(false).valueAccessor(vAccessor).colorAccessor(cAccessor).colors(colors);   
+    var infoPreg = new lg.column("#activity+infowomen").label('Information and commodities for pregnant women').domain([0,1]).axisLabels(false).valueAccessor(vAccessor).colorAccessor(cAccessor).colors(colors);
+    var psySup = new lg.column("#activity+pyschosupport").label('Psychosocial support for affected families').domain([0,1]).axisLabels(false).valueAccessor(vAccessor).colorAccessor(cAccessor).colors(colors);
+    var bloodSafe = new lg.column("#activity+bloodsafety").label('Blood safety').domain([0,1]).axisLabels(false).valueAccessor(vAccessor).colorAccessor(cAccessor).colors(colors);
+    var chemCont = new lg.column("activity+chemvectorcontrol").label('Chemical vector control').domain([0,1]).axisLabels(false).valueAccessor(vAccessor).colorAccessor(cAccessor).colors(colors);
+    var protPart = new lg.column("#activity+protectionpartsettings").label('Protection for particular settings').domain([0,1]).axisLabels(false).valueAccessor(vAccessor).colorAccessor(cAccessor).colors(colors);
+    var commSurv = new lg.column("activity+communitybasedsurveillance").label('Community-based surveillance').domain([0,1]).axisLabels(false).valueAccessor(vAccessor).colorAccessor(cAccessor).colors(colors);
+
     var grid1 = new lg.grid('#grid1')
         .data(data)
         .width($('#grid1').width())
         .height(1200)
-        .nameAttr('Country')
-        .joinAttr('ISO-3')
+        .nameAttr('#country')
+        .joinAttr('#country+code')
         .hWhiteSpace(4)
         .vWhiteSpace(4)
         .margins({top: 150, right: 20, bottom: 30, left: 200})
-        .columns([affected,status,affectedper100000]);
+        .columns([status,affected,affectedper100000]);
 
     var grid2 = new lg.grid('#grid2')
         .data(activities)
         .width($('#grid1').width())
         .height(1200)
-        .nameAttr('Columna Primaria')
-        .joinAttr('ISO-3')
-        .hWhiteSpace(4)
-        .vWhiteSpace(4)
+        .nameAttr('#country')
+        .joinAttr('#country+code')
+        .hWhiteSpace(6)
+        .vWhiteSpace(6)
         .margins({top: 150, right: 20, bottom: 30, left: 200})
-        .columns([riskComms,commClean,hhPro,infoPreg,psySup,bloodSafe,chemCont,protPart,commSurv]);        
+        .columns([riskComms,commClean,hhPro,infoPreg,psySup,bloodSafe,chemCont,protPart,commSurv]);     
 
     lg.init();
 
     $("#map").width($("#map").width());
 
+}
+
+function hxlProxyToJSON(input,headers){
+    var output = [];
+    var keys=[]
+    input.forEach(function(e,i){
+        if(i==0){
+            e.forEach(function(e2,i2){
+                var parts = e2.split('+');
+                var key = parts[0]
+                if(parts.length>1){
+                    var atts = parts.splice(1,parts.length);
+                    atts.sort();                    
+                    atts.forEach(function(att){
+                        key +='+'+att
+                    });
+                }
+                keys.push(key);
+            });
+        } else {
+            var row = {};
+            e.forEach(function(e2,i2){
+                row[keys[i2]] = e2;
+            });
+            output.push(row);
+        }
+    });
+    return output;
 }
 
 function stickydiv(){
@@ -136,14 +166,14 @@ $(window).scroll(function(){
 
 var dataCall = $.ajax({ 
     type: 'GET', 
-    url: 'data/data.json', 
-    dataType: 'json',
+    url: 'data/dashboard.csv', 
+    dataType: 'text',
 });
 
 var activitiesCall = $.ajax({ 
     type: 'GET', 
-    url: 'data/activities.json', 
-    dataType: 'json',
+    url: 'data/nsactivities.csv', 
+    dataType: 'text',
 });
 
 //load geometry
@@ -158,5 +188,14 @@ var geomCall = $.ajax({
 
 $.when(dataCall, activitiesCall, geomCall).then(function(dataArgs, activitiesArgs, geomArgs){
     geom = topojson.feature(geomArgs[0],geomArgs[0].objects.geom);
-    generateDashboard(dataArgs[0],activitiesArgs[0],geom);
+    overview = hxlProxyToJSON(Papa.parse(dataArgs[0]).data,false);
+    activities = hxlProxyToJSON(Papa.parse(activitiesArgs[0]).data,false);
+    overview.forEach(function(d){
+        if(d['#population']==0){
+            d['#affected+percapita'] = null
+        } else {
+            d['#affected+percapita'] = d['#affected+total']/d['#population']*100000
+        }
+    })
+    generateDashboard(overview,activities,geom);
 });
