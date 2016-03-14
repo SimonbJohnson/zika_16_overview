@@ -27,7 +27,8 @@ function generateDashboard(data,activities,geom){
                         })
                         .colors(['#99d594','#ffcc00','#ff0000']);
 
-    var affected = new lg.column('#affected+total').label('No. Affected').scale(d3.scale.log()).domain([1,1500000])
+    max = d3.max(data,function(d){return +d['#affected+total']});                     
+    var affected = new lg.column('#affected+total').label('No. Affected').scale(d3.scale.log()).domain([1,max])
                         .colors(['#edf8fb','#b3cde3','#8c96c6','#8856a7','#810f7c'])
                         .colorAccessor(
                             function(d,i,max){
@@ -38,6 +39,32 @@ function generateDashboard(data,activities,geom){
                                 return c
                             }
                         );
+
+    max = d3.max(data,function(d){return +d['#affected+confirmed']}); 
+    var confirmed = new lg.column('#affected+confirmed').label('Confirmed Cases').scale(d3.scale.log()).domain([1,max])
+                        .colors(['#edf8fb','#b3cde3','#8c96c6','#8856a7','#810f7c'])
+                        .colorAccessor(
+                            function(d,i,max){
+                                d=Math.log(d+1);
+                                max=Math.log(max);
+                                var c = Math.floor(d/max*5);
+                                if(c==5){c=4}
+                                return c
+                            }
+                        );
+    
+    max = d3.max(data,function(d){return +d['#affected+suspected']});                     
+    var suspected = new lg.column('#affected+suspected').label('Suspected Cases').scale(d3.scale.log()).domain([1,max])
+                        .colors(['#edf8fb','#b3cde3','#8c96c6','#8856a7','#810f7c'])
+                        .colorAccessor(
+                            function(d,i,max){
+                                d=Math.log(d+1);
+                                max=Math.log(max);
+                                var c = Math.floor(d/max*5);
+                                if(c==5){c=4}
+                                return c
+                            }
+                        );                                         
 
     var affectedper100000 = new lg.column('#affected+percapita').label('Affected per 100,000').scale(d3.scale.log()).domain([1,1000])
                         .colors(['#edf8fb','#b3cde3','#8c96c6','#8856a7','#810f7c'])
@@ -88,7 +115,7 @@ function generateDashboard(data,activities,geom){
         .hWhiteSpace(4)
         .vWhiteSpace(4)
         .margins({top: 150, right: 20, bottom: 30, left: 200})
-        .columns([status,affected,affectedper100000]);
+        .columns([status,affected,affectedper100000,confirmed,suspected]);
 
     var grid2 = new lg.grid('#grid2')
         .data(activities)
