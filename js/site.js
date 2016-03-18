@@ -1,6 +1,5 @@
-function generateDashboard(data,activities,geom){
+function generateDashboard(data,activities,govactivities,geom){
     var map = new lg.map('#map').geojson(geom).nameAttr('NAME').joinAttr('ISO_A3').zoom(2).center([20,-80]);
-    console.log(data)
     var status = new lg.column('#status')
                         .label('Status')
                         .domain([0,1])
@@ -106,6 +105,28 @@ function generateDashboard(data,activities,geom){
     var protPart = new lg.column("#activity+protectionpartsettings").label('Protection for particular settings').domain([0,1]).axisLabels(false).valueAccessor(vAccessor).colorAccessor(cAccessor).colors(colors);
     var commSurv = new lg.column("activity+communitybasedsurveillance").label('Community-based surveillance').domain([0,1]).axisLabels(false).valueAccessor(vAccessor).colorAccessor(cAccessor).colors(colors);
 
+    var govAction = new lg.column('#indicator+govaction').label('Government Actions').domain([0,1]).axisLabels(false)
+        .valueAccessor(function(d){
+                            if(d== 'Yes'){
+                                return 1;
+                            } else {
+                                return 0.99999
+                            }
+                        })
+        .colorAccessor(function(d,i,max){
+                            if(d=='Yes'){
+                                return 0;
+                            } else {
+                                return 1;
+                            }
+                        }).colors(colors);
+    var govAlert = new lg.column('#indicator+govalert').label('Health Alert').domain([0,1]).axisLabels(false).valueAccessor(vAccessor).colorAccessor(cAccessor).colors(colors);
+    var govCluster = new lg.column('#indicator+nationalhealthcluster').label('Heatlh National Cluster').domain([0,1]).axisLabels(false).valueAccessor(vAccessor).colorAccessor(cAccessor).colors(colors);
+    var govCoord = new lg.column('#indicator+coordmeets').label('').domain([0,1]).axisLabels(false).valueAccessor(vAccessor).colorAccessor(cAccessor).colors(colors);
+    var govMOH = new lg.column('#indicator+moh').label('Activities of the Ministry of Health').domain([0,1]).axisLabels(false).valueAccessor(vAccessor).colorAccessor(cAccessor).colors(colors);
+    var govPubCamp = new lg.column('#indicator+publiccampaign').label('Public Campaign').domain([0,1]).axisLabels(false).valueAccessor(vAccessor).colorAccessor(cAccessor).colors(colors);
+    var govVecCon = new lg.column('#indicator+vectorcontrol').label('Vector Control Activities').domain([0,1]).axisLabels(false).valueAccessor(vAccessor).colorAccessor(cAccessor).colors(colors);
+
     var grid1 = new lg.grid('#grid1')
         .data(data)
         .width($('#grid1').width())
@@ -115,7 +136,7 @@ function generateDashboard(data,activities,geom){
         .hWhiteSpace(4)
         .vWhiteSpace(4)
         .margins({top: 150, right: 20, bottom: 30, left: 200})
-        .columns([status,affected,affectedper100000,confirmed,suspected]);
+        .columns([status,affectedper100000,confirmed,suspected]);
 
     var grid2 = new lg.grid('#grid2')
         .data(activities)
@@ -126,7 +147,18 @@ function generateDashboard(data,activities,geom){
         .hWhiteSpace(6)
         .vWhiteSpace(6)
         .margins({top: 150, right: 20, bottom: 30, left: 200})
-        .columns([riskComms,commClean,hhPro,infoPreg,psySup,bloodSafe,chemCont,protPart,commSurv]);     
+        .columns([riskComms,commClean,hhPro,infoPreg,psySup,bloodSafe,chemCont,protPart,commSurv]);
+
+    var grid3 = new lg.grid('#grid3')
+        .data(govactivities)
+        .width($('#grid1').width())
+        .height(1200)
+        .nameAttr('#country')
+        .joinAttr('#country+code')
+        .hWhiteSpace(6)
+        .vWhiteSpace(6)
+        .margins({top: 150, right: 20, bottom: 30, left: 200})
+        .columns([govAction,govAlert,govCluster,govCoord,govMOH,govPubCamp,govVecCon]);               
 
     lg.init();
 
@@ -177,12 +209,20 @@ $('#grid2').hide();
 
 $('#overviewbutton').on('click',function(){
     $('#grid2').hide();
+    $('#grid3').hide();
     $('#grid1').show();
 });
 
 $('#activitiesbutton').on('click',function(){
     $('#grid1').hide();
+    $('#grid3').hide();
     $('#grid2').show();
+});
+
+$('#govactivitiesbutton').on('click',function(){
+    $('#grid1').hide();
+    $('#grid2').hide();
+    $('#grid3').show();
 });
 
 $(window).scroll(function(){
@@ -203,6 +243,12 @@ var activitiesCall = $.ajax({
     dataType: 'text',
 });
 
+var govactivitiesCall = $.ajax({ 
+    type: 'GET', 
+    url: 'data/government.csv', 
+    dataType: 'text',
+});
+
 //load geometry
 
 var geomCall = $.ajax({ 
@@ -213,10 +259,13 @@ var geomCall = $.ajax({
 
 //when both ready construct dashboard
 
-$.when(dataCall, activitiesCall, geomCall).then(function(dataArgs, activitiesArgs, geomArgs){
+$.when(dataCall, activitiesCall, govactivitiesCall, geomCall).then(function(dataArgs, activitiesArgs, govactivitiesArgs, geomArgs){
     geom = topojson.feature(geomArgs[0],geomArgs[0].objects.geom);
     overview = hxlProxyToJSON(Papa.parse(dataArgs[0]).data,false);
     activities = hxlProxyToJSON(Papa.parse(activitiesArgs[0]).data,false);
+    console.log(Papa.parse(govactivitiesArgs[0]).data);
+    govactivities = hxlProxyToJSON(Papa.parse(govactivitiesArgs[0]).data,false);
+    console.log(govactivities);
     overview.forEach(function(d){
         if(d['#population']==0){
             d['#affected+percapita'] = null
@@ -224,5 +273,5 @@ $.when(dataCall, activitiesCall, geomCall).then(function(dataArgs, activitiesArg
             d['#affected+percapita'] = d['#affected+total']/d['#population']*100000
         }
     })
-    generateDashboard(overview,activities,geom);
+    generateDashboard(overview,activities,govactivities.slice(0,govactivities.length-1),geom);
 });
